@@ -76,7 +76,7 @@ add_action( 'plugins_loaded', function(){
 			}
 
 			if( 0 < absint( $atts[ 'id' ] ) ) {
-				if ( $atts[ 'restrict' ] && ! edd_has_user_purchased( get_current_user_id(), $atts[ 'id' ] ) ) {
+				if ( ! current_user_can( 'manage_options' ) && $atts[ 'restrict' ] && ! edd_has_user_purchased( get_current_user_id(), $atts[ 'id' ] ) ) {
 					if( $atts[ 'show_login' ] ) {
 						if( $atts[ 'login_message' ] ) {
 							echo sprintf( '<div id="edd-stream-login-message">%s</div>', esc_html( $atts[ 'login_message' ]  ) );
