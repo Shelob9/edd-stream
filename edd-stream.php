@@ -68,6 +68,7 @@ add_action( 'plugins_loaded', function(){
 				'show_login'    => false,
 				'login_message' => false
 			), $atts, 'edd_stream' );
+			$atts[ 'id' ] = absint( $atts[ 'id' ] );
 			if( 0 == absint( $atts[ 'id' ] ) ){
 				global $post;
 				if( is_object( $post ) ){
@@ -76,7 +77,7 @@ add_action( 'plugins_loaded', function(){
 			}
 
 			if( 0 < absint( $atts[ 'id' ] ) ) {
-				if ( ! current_user_can( 'manage_options' ) && $atts[ 'restrict' ] && ! edd_has_user_purchased( get_current_user_id(), $atts[ 'id' ] ) ) {
+				if ( ! current_user_can( 'manage_options' ) && $atts[ 'restrict' ] && ! edd_stream_user_has( $atts[ 'id' ] ) ) {
 					if( $atts[ 'show_login' ] ) {
 						if( $atts[ 'login_message' ] ) {
 							echo sprintf( '<div id="edd-stream-login-message">%s</div>', esc_html( $atts[ 'login_message' ]  ) );
@@ -101,6 +102,37 @@ add_action( 'plugins_loaded', function(){
 
 			}
 
+		}
+
+		/**
+		 * Check if current user has purchased a download
+		 *
+		 * @param int|array $download_id ID or IDs of download(s) to check for
+		 *
+		 * @since 0.1.0
+		 *
+		 * @return bool
+		 */
+		function edd_stream_user_has( $download_id ){
+			/**
+			 * Filter IDs to check access on.
+			 *
+			 * @since 0.1.0
+			 *
+			 * @param int|array $download_id ID or IDs of download(s) to check for
+			 */
+			$download_id = apply_filters( 'edd_stream_user_has_id', $download_id );
+
+			$has = edd_has_user_purchased( get_current_user_id(), $download_id );
+
+			/**
+			 * Filter IDs to check access on.
+			 *
+			 * @since 0.1.0
+			 *
+			 * @param bool $has Filter whether or not user has access.
+			 */
+			return (bool) apply_filters( 'edd_stream_user_has', $has );
 		}
 
 	}
