@@ -76,7 +76,7 @@ add_action( 'plugins_loaded', function(){
 				}
 			}
 
-			if( 0 < absint( $atts[ 'id' ] ) ) {
+			if( 0 <  $atts[ 'id' ] ) {
 				if ( ! current_user_can( 'manage_options' ) && $atts[ 'restrict' ] && ! edd_stream_user_has( $atts[ 'id' ] ) ) {
 					if( $atts[ 'show_login' ] ) {
 						if( $atts[ 'login_message' ] ) {
@@ -94,10 +94,10 @@ add_action( 'plugins_loaded', function(){
 
 				switch( $atts[ 'type'] ) {
 					case 'video' :
-						return edd_stream_video( absint( $atts[ 'id' ] ) );
+						return edd_stream_video( $atts[ 'id' ] );
 					break;
 					case 'audio' :
-						return edd_stream_audio( absint( $atts[ 'id' ] ) );
+						return edd_stream_audio( $atts[ 'id' ]  );
 				}
 
 			}
