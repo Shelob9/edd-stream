@@ -77,17 +77,50 @@ class video {
 	 */
 	protected function set_files(){
 		$this->files = edd_get_download_files( $this->download->ID  );
+
 		if ( ! empty( $this->files ) ) {
-			$this->files = wp_list_pluck( $this->files, 'file' );
-			foreach( $this->files as $i => $file ){
-				if( ! $this->is_video( $file ) ){
+
+			foreach( $this->files as $i => $file ) {
+
+				if( ! $this->is_video( $file[ 'file' ] ) ){
 					unset( $this->files[ $i ] );
+				}
+
+				if( class_exists( 'EDD_Amazon_S3' ) ) {
+					if( $this->is_s3( $i ) ) {
+						$this->files[ $i ][ 'file' ] = \EDD_Amazon_S3::get_instance()->get_s3_url( $file[ 'file' ], 60 );
+					}
 				}
 
 			}
 
+			$this->files = wp_list_pluck( $this->files, 'file' );
+
 		}
 
+	}
+
+	/**
+	 * Check if a video file is from Amazon s3
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param $file_id
+	 *
+	 * @return bool
+	 */
+	protected function is_s3( $file_id ) {
+		if( isset( $this->files[ $file_id ] ) ) {
+
+			$file_name = $this->files[ $file_id ]['file'];
+			// Check whether thsi is an Amazon S3 file or not
+			if( ( '/' !== $file_name[0] && strpos( $file_name, 'http://' ) === false && strpos( $file_name, 'https://' ) === false && strpos( $file_name, 'ftp://' ) === false ) || false !== ( strpos( $file_name, 'AWSAccessKeyId' ) ) ) {
+
+				return true;
+
+			}
+
+		}
 	}
 
 	/**
@@ -100,11 +133,12 @@ class video {
 	 * @return bool
 	 */
 	protected function is_video( $url ){
-		if( filter_var( $url, FILTER_VALIDATE_URL ) ) {
+
 			$info = new \SplFileInfo( $url );
+
 			return in_array( $info->getExtension(), array( 'mp4', 'ogg' ) );
 
-		}
+
 
 	}
 

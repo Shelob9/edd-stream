@@ -84,7 +84,6 @@ class videos {
 
 		$atts = $this->atts();
 		$atts[ 'src' ] = $url;
-
 		return wp_video_shortcode( $atts );
 
 	}
@@ -96,10 +95,14 @@ class videos {
 	 *
 	 * @param array $files The files
 	 */
-	private function set_html( $files ) {
+	protected function set_html( $files ) {
 		if ( ! empty( $files ) ) {
 			foreach ( $files as $url ) {
-				$this->html .= $this->player( $url );
+				if ( ! $this->is_s3_url( $url ) ) {
+					$this->html .= $this->player( $url );
+				} else {
+					$this->html .= $this->s3_html( $url );
+				}
 
 			}
 
@@ -107,6 +110,40 @@ class videos {
 
 	}
 
+	/**
+	 * Check if video URL is from Amazon s3
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string $url Video URL
+	 *
+	 * @return bool
+	 */
+	protected function is_s3_url( $url ){
+		if( false !== strpos( $url, 's3.amazonaws' ) ) {
+			return true;
+		}
+
+	}
+
+	/**
+	 * Use a normal HTML5 video player for s3 videos for now
+	 *
+	 * @TODO This, but better
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string $url Video URL
+	 */
+	protected function s3_html( $url ){
+		if( filter_var( $url, FILTER_VALIDATE_URL ) ) :
+	?>
+		<video width="640" height="360" controls>
+			<source src="<?php echo esc_url_raw( $url ); ?>" type="video/mp4">
+		</video>
+	<?php
+		endif;
+	}
 
 
 }
